@@ -18,9 +18,9 @@ RUN mkdir -p /etc/asterisk \
     && mkdir -p /var/spool/asterisk
 
 # Copy your custom configuration files
-COPY asterisk.conf /etc/asterisk/
-COPY pjsip.conf /etc/asterisk/
-COPY extensions.conf /etc/asterisk/
+COPY ./config/asterisk.conf /etc/asterisk/
+COPY ./config/pjsip.conf /etc/asterisk/
+COPY ./config/extensions.conf /etc/asterisk/
 
 # Expose the necessary ports
 EXPOSE 5060/udp 5060/tcp 10000-10100/udp
