@@ -1,21 +1,32 @@
-# Use the official Asterisk image as a base
-FROM andrius/asterisk:latest
+# Use the official Alpine Linux image as the base
+FROM alpine:latest
 
-# Set the working directory
-WORKDIR /etc/asterisk
+# Install necessary dependencies
+RUN apk add --no-cache \
+    asterisk \
+    asterisk-res-pjsip \
+    asterisk-chan-pjsip \
+    asterisk-codec-opus \
+    asterisk-codec-g722 \
+    asterisk-codec-gsm \
+    asterisk-codec-alaw \
+    asterisk-codec-ulaw
 
-# Copy configuration files
-COPY config/sip.conf .
-COPY config/extensions.conf .
-COPY config/rtp.conf .
-COPY config/asterisk.conf .
-COPY config/stasis.conf .
-COPY config/logger.conf .
-COPY config/modules.conf .
+# Create necessary directories
+RUN mkdir -p /etc/asterisk \
+    && mkdir -p /var/lib/asterisk \
+    && mkdir -p /var/spool/asterisk
 
-# Expose necessary ports
-EXPOSE 5060/udp
-EXPOSE 10000-10010/udp
+# Copy your custom configuration files
+COPY asterisk.conf /etc/asterisk/
+COPY pjsip.conf /etc/asterisk/
+COPY extensions.conf /etc/asterisk/
 
-# Start Asterisk in foreground mode
-CMD ["asterisk", "-vvvvd", "-c", "-g"]
+# Expose the necessary ports
+EXPOSE 5060/udp 5060/tcp 10000-20000/udp
+
+# Start Asterisk
+# CMD ["asterisk", "-f", "-c", "-g"]
+
+# Start a shell
+CMD ["/bin/sh"]

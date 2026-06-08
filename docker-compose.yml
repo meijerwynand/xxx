@@ -3,12 +3,18 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: asterisk-container
     ports:
       - "5060:5060/udp"
-      - "10000-10010:10000-10010/udp"  # Smaller RTP port range
+      - "5060:5060/tcp"
+      - "10000-20000:10000-20000/udp"
     volumes:
       - ./config:/etc/asterisk
+      - ./logs:/var/log/asterisk
+      - ./spool:/var/spool/asterisk
     environment:
-      - SIP_PROVIDER_HOST=sip.provider.com
-      - SIP_PROVIDER_USERNAME=your_username
-      - SIP_PROVIDER_PASSWORD=your_password
+      - TZ=America/New_York  # Set your timezone here
+
+networks:
+  default:
+    driver: bridge
