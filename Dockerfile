@@ -5,9 +5,9 @@ FROM alpine:latest
 # RUN apk add --no-cache asterisk 
 
 # Create necessary directories
-RUN mkdir -p /etc/asterisk \
-    && mkdir -p /var/lib/asterisk \
-    && mkdir -p /var/spool/asterisk
+# RUN mkdir -p /etc/asterisk \
+#     && mkdir -p /var/lib/asterisk \
+#     && mkdir -p /var/spool/asterisk
 
 # Copy your custom configuration files
 # COPY ./config/asterisk.conf /etc/asterisk/
