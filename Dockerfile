@@ -7,10 +7,11 @@ WORKDIR /etc/asterisk
 # Copy configuration files
 COPY config/sip.conf .
 COPY config/extensions.conf .
+COPY config/rtp.conf .
 
 # Expose necessary ports
 EXPOSE 5060/udp
-EXPOSE 10000-20000/udp
+EXPOSE 10000-10010/udp
 
 # Start Asterisk in foreground mode
 CMD ["asterisk", "-vvvvd", "-c", "-g"]
