@@ -3,8 +3,7 @@ FROM alpine:latest
 
 # Install necessary dependencies
 RUN apk add --no-cache \
-    asterisk \
-    asterisk-pjsip
+    asterisk 
 
 # Create necessary directories
 RUN mkdir -p /etc/asterisk \
