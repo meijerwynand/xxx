@@ -1,5 +1,5 @@
 # Use the official Asterisk image as a base
-FROM asterisk:latest
+FROM andrius/asterisk:latest
 
 # Set the working directory
 WORKDIR /etc/asterisk
