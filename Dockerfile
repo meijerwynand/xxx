@@ -23,7 +23,7 @@ COPY pjsip.conf /etc/asterisk/
 COPY extensions.conf /etc/asterisk/
 
 # Expose the necessary ports
-EXPOSE 5060/udp 5060/tcp 10000-20000/udp
+EXPOSE 5060/udp 5060/tcp 10000-10100/udp
 
 # Start Asterisk
 # CMD ["asterisk", "-f", "-c", "-g"]
