@@ -4,13 +4,7 @@ FROM alpine:latest
 # Install necessary dependencies
 RUN apk add --no-cache \
     asterisk \
-    asterisk-res-pjsip \
-    asterisk-chan-pjsip \
-    asterisk-codec-opus \
-    asterisk-codec-g722 \
-    asterisk-codec-gsm \
-    asterisk-codec-alaw \
-    asterisk-codec-ulaw
+    asterisk-pjsip
 
 # Create necessary directories
 RUN mkdir -p /etc/asterisk \
