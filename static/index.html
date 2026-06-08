@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebRTC VoIP Call</title>
+</head>
+<body>
+  <h1>WebRTC VoIP Call</h1>
+  <button id="callButton">Call</button>
+  <button id="hangupButton">Hang Up</button>
+  <video id="localVideo" autoplay muted playsinline></video>
+  <video id="remoteVideo" autoplay playsinline></video>
+
+  <script>
+    const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(`${wsProtocol}://${location.hostname}:3001`);
+
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const callButton = document.getElementById('callButton');
+    const hangupButton = document.getElementById('hangupButton');
+
+    let localStream;
+    let peerConnection;
+
+    const iceConfig = {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' }
+      ]
+    };
+
+    function setupPeerConnection(pc) {
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.send(JSON.stringify({
+            type: 'candidate',
+            candidate: event.candidate
+          }));
+        }
+      };
+
+      pc.ontrack = (event) => {
+        remoteVideo.srcObject = event.streams[0];
+      };
+    }
+
+    async function initMedia() {
+      try {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: true
+        });
+        localVideo.srcObject = localStream;
+      } catch (error) {
+        console.error('Error accessing media devices:', error);
+      }
+    }
+
+    callButton.onclick = async () => {
+      if (!localStream) {
+        await initMedia();
+      }
+
+      peerConnection = new RTCPeerConnection(iceConfig);
+      setupPeerConnection(peerConnection);
+
+      localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+      });
+
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      socket.send(JSON.stringify({
+        type: 'offer',
+        sdp: peerConnection.localDescription
+      }));
+    };
+
+    hangupButton.onclick = () => {
+      if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
+      }
+      remoteVideo.srcObject = null;
+    };
+
+    socket.onmessage = async (event) => {
+      const message = JSON.parse(event.data);
+
+      switch (message.type) {
+        case 'offer':
+          if (!localStream) {
+            await initMedia();
+          }
+
+          peerConnection = new RTCPeerConnection(iceConfig);
+          setupPeerConnection(peerConnection);
+
+          localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+          });
+
+          await peerConnection.setRemoteDescription(
+            new RTCSessionDescription(message.sdp)
+          );
+
+          const answer = await peerConnection.createAnswer();
+          await peerConnection.setLocalDescription(answer);
+
+          socket.send(JSON.stringify({
+            type: 'answer',
+            sdp: peerConnection.localDescription
+          }));
+          break;
+
+        case 'answer':
+          if (peerConnection) {
+            await peerConnection.setRemoteDescription(
+              new RTCSessionDescription(message.sdp)
+            );
+          }
+          break;
+
+        case 'candidate':
+          if (peerConnection) {
+            await peerConnection.addIceCandidate(
+              new RTCIceCandidate(message.candidate)
+            );
+          }
+          break;
+      }
+    };
+
+    socket.onopen = () => console.log('WebSocket connected');
+    socket.onerror = (err) => console.error('WebSocket error:', err);
+
+    initMedia();
+  </script>
+</body>
+</html>
