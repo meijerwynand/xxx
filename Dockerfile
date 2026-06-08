@@ -2,8 +2,7 @@
 FROM alpine:latest
 
 # Install necessary dependencies
-RUN apk add --no-cache \
-    asterisk 
+RUN apk add --no-cache asterisk 
 
 # Create necessary directories
 RUN mkdir -p /etc/asterisk \
